@@ -14,7 +14,7 @@ const char *back ="\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
 		  "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
 		  "\b\b\b\b\b\b\b\b\b\b\b\b";
 
-const char *log_file = "/tmp/log.txt";
+const char *log_file = "/tmp/log-owned.txt";
 
 #define TPM_OWNED     0x0
 
@@ -30,7 +30,7 @@ void usage()
 	       "                a: stop on errors or timeouts\n"
 	       "                r: run (will not stop)\n"
 	       "\n"
-	       "notice:: logs are captured to /tmp/log.txt\n");
+	       "notice:: logs are captured to /tmp/log-owned.txt\n");
 }
 
 int main (int argc, char *argv[])
@@ -44,6 +44,7 @@ int main (int argc, char *argv[])
 	bool stop_on_all = false;
 	int options_passed = 0, option_index = 0;
 	clock_t start;
+	int rc = 0;
 
 	while ((option_index = getopt(argc, argv, "reta")) != -1) {
 		options_passed = 1;
@@ -114,11 +115,17 @@ int main (int argc, char *argv[])
 		/* timeout due to flow control (recoverable) */
 		timeouts++;
 
+		if (ferror(fp))
+			rc = errno;
+		else
+			rc = 0;
+
 		fprintf(log, "spi read8 timeout event:\n"
-			" - iterations :%lld\n"
+			" - iterations : %lld\n"
 			" - value read : %d ... should be 0 (seed)\n"
 			" - timeouts   : %d\n",
-			iterations, owned, timeouts);
+			" - error      : %d\n",
+			iterations, owned, timeouts, rc);
 		fflush(log);
 
 		if (stop_on_timeouts || stop_on_all) {

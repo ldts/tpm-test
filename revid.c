@@ -14,7 +14,7 @@ const char *back ="\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
 		  "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
 		  "\b\b\b\b\b\b\b\b\b\b\b\b";
 
-const char *log_file = "/tmp/log.txt";
+const char *log_file = "/tmp/log-revid.txt";
 
 #define TPM_IDLE     0x80
 #define TPM_IN_USE   0xA0
@@ -32,7 +32,7 @@ void usage()
 	       "                a: stop on errors or timeouts\n"
 	       "                r: run (will not stop)\n"
 	       "\n"
-	       "notice:: logs are captured to /tmp/log.txt\n");
+	       "notice:: logs are captured to /tmp/log-revid.txt\n");
 }
 
 int main (int argc, char *argv[])
@@ -97,7 +97,7 @@ int main (int argc, char *argv[])
 				errors++;
 				fprintf(log, "spi read8 failure event:\n"
 					" - iterations :%lld\n"
-					" - value read : %hu\n"
+					" - value read : %hu (0xFB or 0xFA as per tpm-sysfs.c)\n"
 					" - timeouts   : %d\n",
 					iterations, revid, timeouts);
 				fflush(log);
@@ -118,7 +118,7 @@ int main (int argc, char *argv[])
 
 		fprintf(log, "spi read8 timeout event:\n"
 			" - iterations :%lld\n"
-			" - value read : %hu ... should be 221 (seed)\n"
+			" - value read : %hu\n"
 			" - timeouts   : %d\n",
 			iterations, revid, timeouts);
 		fflush(log);
